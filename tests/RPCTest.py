@@ -17,3 +17,6 @@ class RPCTest (unittest.TestCase):
 
     def test_ping (self):
         self.assertEqual (self.client.ping (), "100")
+
+    def test_noop (self):
+        self.client.noop ()

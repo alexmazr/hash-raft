@@ -17,6 +17,7 @@ class ClientRPC:
             
     def connect (self):
         socket = so.socket ()
+        socket.setsockopt (so.SOL_SOCKET, so.SO_REUSEADDR, 1)
         socket.connect ((self.serverIp, self.serverPort))
         return socket
      

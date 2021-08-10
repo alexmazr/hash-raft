@@ -1,4 +1,5 @@
 import socket as so
+import threading
 
 class ServerRPC:
     def __init__ (self, ip, port, bufferSize):
@@ -8,7 +9,6 @@ class ServerRPC:
         self.socket = so.socket ()
         self.socket.setsockopt (so.SOL_SOCKET, so.SO_REUSEADDR, 1)
         self.shouldTerminate = False
-        self.connection = None
 
     def getIp (self):
         return self.ip 
@@ -21,7 +21,6 @@ class ServerRPC:
         self.socket.listen ()
         while (True):
             connection, address = self.socket.accept ()
-            self.connection = connection
             connection.settimeout (1)
             data = connection.recv (self.bufferSize).decode ()
             connection.send (str.encode (str(eval ("self." + data))))

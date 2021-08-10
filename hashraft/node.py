@@ -1,4 +1,5 @@
 from .rpc.ServerRPC import ServerRPC
+import time
 
 class Node (ServerRPC):
     def __init__ (self, ip, port, name, nodes):
@@ -8,3 +9,7 @@ class Node (ServerRPC):
 
     def ping (self):
         return 100
+
+    def noop (self):
+        print ("i am alive")
+    

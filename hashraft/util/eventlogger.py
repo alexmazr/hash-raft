@@ -10,7 +10,7 @@ class EventLogger:
     def __init__ (self):
         self.mutex = threading.Lock ()
         self.dataLog = []
-        self.loggingLevel = LoggingLevel.TRACE
+        self.loggingLevel = LoggingLevel.NONE
 
     def trace (self, message):
         self.mutex.acquire ()
