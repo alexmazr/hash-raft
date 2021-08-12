@@ -1,6 +1,7 @@
 import unittest
 from pydoc import locate
 import pkgutil
+import threading
 
 
 def suite ():
@@ -18,3 +19,5 @@ def suite ():
 if __name__ == '__main__':
     runner = unittest.TextTestRunner ()
     runner.run (suite ())
+    #for thread in threading.enumerate(): 
+    #    print(thread.name)

@@ -11,5 +11,8 @@ class Node (ServerRPC):
         return 100
 
     def noop (self):
-        print ("i am alive")
+        print ("\nhi")
+
+    def testWait (self):
+        time.sleep (2)
     
