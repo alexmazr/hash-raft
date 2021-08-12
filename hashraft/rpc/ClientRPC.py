@@ -4,13 +4,14 @@ import asyncio
 class ClientRPC:
 
     def __init__ (self, server, bufferSize, timeout):
-        method_list = [func for func in dir(server) if callable(getattr(server, func)) and not func.startswith("__")]
+        method_list = [func for func in dir(server) if callable(getattr(server, func)) and not func.startswith("__") and func.startswith("rpc_")]
         self.send = self.Send (server)
         self.send_recv = self.Send_Recv (server, bufferSize)
 
         for method in method_list:
-            setattr (self.send, method, self.send.getLambda (method))
-            setattr (self.send_recv, method, self.send_recv.getLambda (method))
+            methodName = method[4:]
+            setattr (self.send, methodName, self.send.getLambda (method))
+            setattr (self.send_recv, methodName, self.send_recv.getLambda (method))
 
     class Send:
         def __init__ (self, server):

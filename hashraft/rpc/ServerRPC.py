@@ -10,6 +10,7 @@ class ServerRPC:
         self.queue = CircularBuffer (10)
         self.shouldTerminate = False
         self.server = None
+        self.loop = None
 
     def getIp (self):
         return self.ip 
@@ -23,37 +24,43 @@ class ServerRPC:
         writer.close ()
         await writer.wait_closed ()
 
-    def callChildMethod (self, data, writer, loop):
+    def callChildMethod (self, data, writer):
         decoded_data = data.decode ()
         response_code = decoded_data[:1]
         to_call = decoded_data[2:]
         response = str (eval ("self." + to_call)).encode ()
         if response_code == "r":
-            asyncio.run_coroutine_threadsafe (self.respond (writer, response), loop)
+            asyncio.run_coroutine_threadsafe (self.respond (writer, response), self.loop)
 
-    def process (self, loop):
+    def process (self):
         while (self.server.is_serving ()):
             to_process = self.queue.pop ()
-            threading.Thread (target=self.callChildMethod, name=to_process["data"], daemon=True, args=[to_process["data"], to_process["writer"], loop]).start ()
+            threading.Thread (target=self.callChildMethod, name="process", daemon=True, args=[to_process["data"], to_process["writer"]]).start ()
 
     async def handler (self, reader, writer):
         data = await reader.read (self.bufferSize)
         self.queue.push ({"data": data, "writer": writer})
 
     async def run (self):
+        self.loop = asyncio.get_event_loop ()
         self.server = await asyncio.start_server (self.handler, self.ip, self.port, reuse_port=True)
         async with self.server:
             try:
                 await asyncio.gather (
                     self.server.serve_forever (), 
-                    asyncio.to_thread (self.process, asyncio.get_event_loop ())
+                    asyncio.to_thread (self.process)
                 )
             except asyncio.exceptions.CancelledError:
                 pass
        
     def start (self):
         asyncio.run (self.run ())
-
-    def terminate (self):
+    
+    async def shutdownRoutine (self):
         self.server.close ()
+        await self.server.wait_closed ()
+        self.queue.finished ()
+
+    def rpc_terminate (self):
+        asyncio.run_coroutine_threadsafe (self.shutdownRoutine (), self.loop)
 

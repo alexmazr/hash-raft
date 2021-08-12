@@ -7,12 +7,12 @@ class Node (ServerRPC):
         self.name = name
         self.nodes = nodes
 
-    def ping (self):
+    def rpc_ping (self):
         return 100
 
     def noop (self):
         print ("\nhi")
 
-    def testWait (self):
+    def rpc_testWait (self):
         time.sleep (2)
     
