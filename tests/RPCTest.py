@@ -10,13 +10,17 @@ from timeit import default_timer as timer
 class RPCTest (unittest.TestCase):
 
     def setUp (self):
-        self.node = Node ("localhost", 8080, 'test_node', {})
+        nodeList = [Node ("localhost", 8081, 'node2', []), Node ("localhost", 8082, 'node3', []), Node ("localhost", 8083, 'node4', [])]
+        self.node = Node ("localhost", 8080, 'node1', nodeList)
         self.server = threading.Thread (target=self.node.start, name="serverThread", args=[])
         self.server.start ()
-        self.client = ClientRPC (self.node, 1024, 1)
+        for node in nodeList:
+            threading.Thread (target=node.start, name="serverThread", args=[]).start ()
+        self.client = ClientRPC (Node, "localhost", 8080, 1024, 1)
         time.sleep (0.5)
 
     def tearDown (self):
+        self.client.send.terminateAll ()
         self.client.send.terminate ()
         self.server.join ()
 
@@ -41,4 +45,7 @@ class RPCTest (unittest.TestCase):
         for restricted in restrictedMethods:
             self.assertNotIn (restricted, clientSendMethods)
             self.assertNotIn (restricted, clientSendRecvMethods)
+
+    def testPingAll (self):
+        self.client.send.pingAll ()
 

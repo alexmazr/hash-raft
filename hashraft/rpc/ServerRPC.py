@@ -64,3 +64,8 @@ class ServerRPC:
     def rpc_terminate (self):
         asyncio.run_coroutine_threadsafe (self.shutdownRoutine (), self.loop)
 
+
+    # async def messageAll (self):
+
+        
+
