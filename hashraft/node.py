@@ -1,38 +1,40 @@
 import asyncio
 from .rpc.ServerRPC import ServerRPC
 from .rpc.ClientRPC import ClientRPC
+from .rpc.MultiClient import MultiClient
+import yaml
 
 import time
 
 class Node (ServerRPC):
-    def __init__ (self, ip, port, name, nodes):
+    def __init__ (self, ip, port, name):
         super ().__init__ (ip, port, 1024)
         self.name = name
-        self.nodes = nodes
-        self.clients = []
-        for node in nodes:
-            if node.name == self.name:
-                continue
-            self.clients.append (ClientRPC (Node, node.ip, node.port, 1024, 1))
-        
+
+        with open ("raftConfig.yaml", "r") as stream:
+            try:
+                config = yaml.safe_load (stream)
+            except yaml.YAMLError as e: # What to do on error here?
+                print (e)
+        self.nodes = MultiClient (Node)
+        for k, v in config["nodes"].items ():
+            if name != k:
+                self.nodes.add (Node, v["ip"], int(v["port"]), 1024, 2)
+
     def rpc_ping (self):
-        print (self.name + " pinged!")
-        return 100
-
-    def noop (self):
-        print ("\nhi")
-
-    def rpc_testWait (self):
-        time.sleep (2)
+        return "200"
 
     def rpc_pingAll (self):
-        print (self.name + " pinging all")
-        for client in self.clients:
-            client.send.ping ()
-        print ("-----------")
+        status = self.nodes.send_recv.ping ()
+
+        if len (status) != len (self.nodes):
+            return "A server is down!"
+        for code in status:
+            if code != "200":
+                return "A server has encountered an error!"
+        return "200"
 
     def rpc_terminateAll (self):
-        for client in self.clients:
-            client.send.terminate ()
+        self.nodes.send.terminate ()
 
     

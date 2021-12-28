@@ -1,7 +1,6 @@
 import unittest
 from pydoc import locate
 import pkgutil
-import threading
 
 
 def suite ():

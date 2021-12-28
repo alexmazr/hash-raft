@@ -2,7 +2,7 @@
 
 ## How to run
 In a terminal with Python 3 installed, navigate to this projects root directory. 
-Enter the command: `python3 -m tests` in your terminal.
+Enter the command: `python3.9 -m tests` in your terminal.
 
 ## How to add your own unit tests
 1. Create a new file under `/tests`, name if after the file you would like to test.
