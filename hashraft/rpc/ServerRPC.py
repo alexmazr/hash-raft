@@ -1,14 +1,11 @@
 import asyncio
 import threading
-from .ServerQueue import CircularBuffer
-from timeit import default_timer as timer
 
 class ServerRPC:
     def __init__ (self, ip, port, bufferSize):
         self.ip = ip
         self.port = port
         self.bufferSize = bufferSize
-        self.queue = CircularBuffer (10)
         self.shouldTerminate = False
         self.server = None
         self.loop = None
@@ -56,7 +53,6 @@ class ServerRPC:
     async def shutdownRoutine (self):
         self.server.close ()
         await self.server.wait_closed ()
-        self.queue.finished ()
 
     def rpc_terminate (self):
         asyncio.run_coroutine_threadsafe (self.shutdownRoutine (), self.loop)
