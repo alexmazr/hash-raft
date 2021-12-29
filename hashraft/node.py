@@ -1,10 +1,7 @@
-import asyncio
 from .rpc.ServerRPC import ServerRPC
-from .rpc.ClientRPC import ClientRPC
 from .rpc.MultiClient import MultiClient
+from .cache.SimpleCache import SimpleCache
 import yaml
-
-import time
 
 class Node (ServerRPC):
     def __init__ (self, ip, port, name):
@@ -21,6 +18,8 @@ class Node (ServerRPC):
             if name != k:
                 self.nodes.add (Node, v["ip"], int(v["port"]), 1024, 2)
 
+        self.cache = SimpleCache ()
+
     def rpc_ping (self):
         return "200"
 
@@ -36,5 +35,17 @@ class Node (ServerRPC):
 
     def rpc_terminateAll (self):
         self.nodes.send.terminate ()
+
+    def rpc_store (self, key, value):
+        self.cache.add (key, value)
+    
+    def rpc_fetch (self, key):
+        return self.cache.get (key)
+    
+    def rpc_update (self, key, value):
+        self.cache.update (key, value)
+    
+    def rpc_remove (self, key):
+        self.cache.remove (key)
 
     

@@ -1,6 +1,7 @@
 import asyncio
 import threading
 from .ServerQueue import CircularBuffer
+from timeit import default_timer as timer
 
 class ServerRPC:
     def __init__ (self, ip, port, bufferSize):
@@ -32,24 +33,20 @@ class ServerRPC:
         if response_code == "r":
             asyncio.run_coroutine_threadsafe (self.respond (writer, response), self.loop)
 
-    def process (self):
-        while (self.server.is_serving ()):
-            to_process = self.queue.pop ()
-            threading.Thread (target=self.callChildMethod, name="process", daemon=True, args=[to_process["data"], to_process["writer"]]).start ()
-
     async def handler (self, reader, writer):
         data = await reader.read (self.bufferSize)
-        self.queue.push ({"data": data, "writer": writer})
+        threading.Thread (target=self.callChildMethod, name="process", daemon=True, args=[data, writer]).start ()
 
     async def run (self):
         self.loop = asyncio.get_event_loop ()
         self.server = await asyncio.start_server (self.handler, self.ip, self.port, reuse_port=True)
         async with self.server:
             try:
-                await asyncio.gather (
-                    self.server.serve_forever (), 
-                    asyncio.to_thread (self.process)
-                )
+                # await asyncio.gather (
+                #     self.server.serve_forever (), 
+                #     asyncio.to_thread (self.process)
+                # )
+                await self.server.serve_forever ()
             except asyncio.exceptions.CancelledError:
                 pass
        
