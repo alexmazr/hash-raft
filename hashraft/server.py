@@ -33,6 +33,7 @@ class RaftServer:
 
         try:
             self.socket.bind ((self.ip, self.port))
+            print (self.ip)
         except:
             self.logger.error ("Socket failed to bind for node: " + self.name + " [" + self.addressStr + "]")
             return

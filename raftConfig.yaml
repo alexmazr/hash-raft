@@ -17,4 +17,4 @@ nodes:
     port: 8083
   node5:
     ip: "localhost"
-    port: 8085
+    port: 8084
