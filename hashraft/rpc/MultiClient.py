@@ -48,7 +48,10 @@ class MultiClient:
             return lambda *args:self.send_Recv_All (message, *args)
 
         def send_Recv_All (self, message, *args):
-            coroutines = [x.send_recv.send_recv (message) for x in self.clients]
+            if args:
+                coroutines = [x.send_recv.send_recv (message, *args) for x in self.clients]
+            else:
+                coroutines = [x.send_recv.send_recv (message) for x in self.clients]
             return asyncio.run (self.internal_gather (coroutines))
 
         async def internal_gather (self, coroutines):
